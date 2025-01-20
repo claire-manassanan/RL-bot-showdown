@@ -1,4 +1,6 @@
 import asyncio
+import os
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
 
 import numpy as np
 from gymnasium.spaces import Box, Space
@@ -9,14 +11,14 @@ from rl.policy import EpsGreedyQPolicy, LinearAnnealedPolicy
 
 from tabulate import tabulate
 from tensorflow.keras.layers import Dense, Flatten
-from tensorflow.keras.models import Sequential
+from tensorflow.keras import Sequential, Input
 from tensorflow.keras.optimizers import Adam
 
 from poke_env.environment.abstract_battle import AbstractBattle
 from poke_env.player import (
     Gen8EnvSinglePlayer,
     MaxBasePowerPlayer,
-    ObservationType,
+    ObsType,
     RandomPlayer,
     SimpleHeuristicsPlayer,
     background_cross_evaluate,
@@ -190,84 +192,25 @@ class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
     
 async def main():
     # Lock agent team
-    team1 = """
-Archaludon @ Assault Vest  
-Ability: Stamina  
-Level: 50  
-Tera Type: Fairy  
-EVs: 220 HP / 4 Def / 52 SpA / 116 SpD / 116 Spe  
-Bold Nature  
-IVs: 26 Atk  
-- Electro Shot  
-- Draco Meteor  
-- Flash Cannon  
-- Body Press  
+    team1_file = open('team1.txt')
+    # team2_file = open('team2.txt')
 
-Rillaboom @ Loaded Dice  
-Ability: Grassy Surge  
-Level: 50  
-Tera Type: Fire  
-EVs: 204 HP / 116 Atk / 4 Def / 60 SpD / 124 Spe  
-Adamant Nature  
-- Bullet Seed  
-- Grassy Glide  
-- Fake Out  
-- High Horsepower  
+    team1 = team1_file.read()
+    # team2 = team2_file.read()
 
-Basculegion @ Choice Band  
-Ability: Swift Swim  
-Level: 50  
-Tera Type: Grass  
-EVs: 252 Atk / 4 Def / 252 Spe  
-Adamant Nature  
-- Wave Crash  
-- Last Respects  
-- Flip Turn  
-- Aqua Jet  
-
-Kingambit @ Black Glasses  
-Ability: Defiant  
-Level: 50  
-Tera Type: Dark  
-EVs: 236 HP / 228 Atk / 4 Def / 4 SpD / 36 Spe  
-Adamant Nature  
-- Kowtow Cleave  
-- Sucker Punch  
-- Swords Dance  
-- Protect  
-
-Pelipper @ Focus Sash  
-Ability: Drizzle  
-Level: 50  
-Tera Type: Ghost  
-EVs: 4 HP / 252 SpA / 252 Spe  
-Modest Nature  
-- Weather Ball  
-- Hurricane  
-- Tailwind  
-- Protect  
-
-Electabuzz @ Eviolite  
-Ability: Vital Spirit  
-Level: 50  
-Tera Type: Ghost  
-EVs: 244 HP / 180 Def / 4 SpA / 20 SpD / 60 Spe  
-Bold Nature  
-IVs: 20 Atk  
-- Electroweb  
-- Taunt  
-- Follow Me  
-- Protect 
-"""
-    agent = SimpleRLPlayer(
-        battle_format="gen9vgc2024",
-        start_challenging=True,
-        team=team1,
-    )
+    team1_file.close()
+    # team2_file.close()
 
     opponent = RandomPlayer(
         battle_format="gen9vgc2024",
         team=team1,
+    )
+
+    agent = SimpleRLPlayer(
+        battle_format="gen9vgc2024",
+        start_challenging=True,
+        team=team1,
+        opponent=opponent
     )
 
     # Train, evaluate, and save the model
@@ -297,7 +240,7 @@ IVs: 20 Atk
         delta_clip=0.01,
         enable_double_dqn=True,
     )
-    dqn.compile(Adam(learning_rate=0.00025), metrics=["mae"])
+    dqn.compile(Adam(learning_rate=0.001), metrics=["mae"])
     dqn.fit(agent, nb_steps=10000)
 
     # Save the model

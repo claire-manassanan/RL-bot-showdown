@@ -1,67 +1,67 @@
-Annihilape (M) @ Safety Goggles  
+Archaludon @ Assault Vest  
+Ability: Stamina  
+Level: 50  
+Tera Type: Fairy  
+EVs: 220 HP / 4 Def / 52 SpA / 116 SpD / 116 Spe  
+Bold Nature  
+IVs: 26 Atk  
+- Electro Shot  
+- Draco Meteor  
+- Flash Cannon  
+- Body Press  
+
+Rillaboom @ Loaded Dice  
+Ability: Grassy Surge  
+Level: 50  
+Tera Type: Fire  
+EVs: 204 HP / 116 Atk / 4 Def / 60 SpD / 124 Spe  
+Adamant Nature  
+- Bullet Seed  
+- Grassy Glide  
+- Fake Out  
+- High Horsepower  
+
+Basculegion @ Choice Band  
+Ability: Swift Swim  
+Level: 50  
+Tera Type: Grass  
+EVs: 252 Atk / 4 Def / 252 Spe  
+Adamant Nature  
+- Wave Crash  
+- Last Respects  
+- Flip Turn  
+- Aqua Jet  
+
+Kingambit @ Black Glasses  
 Ability: Defiant  
 Level: 50  
-Shiny: Yes  
-Tera Type: Water  
-EVs: 252 HP / 4 Atk / 252 Spe  
-Jolly Nature  
-- Rage Fist  
-- Drain Punch  
-- Bulk Up  
+Tera Type: Dark  
+EVs: 236 HP / 228 Atk / 4 Def / 4 SpD / 36 Spe  
+Adamant Nature  
+- Kowtow Cleave  
+- Sucker Punch  
+- Swords Dance  
 - Protect  
 
-Ninetales-Alola (F) @ Covert Cloak  
-Ability: Snow Warning  
-Level: 50  
-Shiny: Yes  
-Tera Type: Ice  
-EVs: 4 Def / 252 SpA / 252 Spe  
-Timid Nature  
-- Blizzard  
-- Freeze-Dry  
-- Aurora Veil  
-- Protect  
-
-Talonflame @ Sharp Beak  
-Ability: Gale Wings  
-Level: 50  
-Tera Type: Ghost  
-EVs: 4 HP / 252 Atk / 252 Spe  
-Jolly Nature  
-- Dual Wingbeat  
-- Tailwind  
-- Will-O-Wisp  
-- Protect  
-
-Garchomp (M) @ Life Orb  
-Ability: Rough Skin  
-Level: 50  
-Tera Type: Steel  
-EVs: 252 Atk / 4 SpD / 252 Spe  
-Jolly Nature  
-- Earthquake  
-- Stomping Tantrum  
-- Dragon Claw  
-- Protect  
-
-Vivillon-Ocean (F) @ Focus Sash  
-Ability: Compound Eyes  
+Pelipper @ Focus Sash  
+Ability: Drizzle  
 Level: 50  
 Tera Type: Ghost  
 EVs: 4 HP / 252 SpA / 252 Spe  
-Timid Nature  
-- Sleep Powder  
+Modest Nature  
+- Weather Ball  
 - Hurricane  
-- Rage Powder  
+- Tailwind  
 - Protect  
 
-Gholdengo @ Iron Plate  
-Ability: Good as Gold  
+Electabuzz @ Eviolite  
+Ability: Vital Spirit  
 Level: 50  
-Tera Type: Steel  
-EVs: 4 HP / 252 SpA / 252 Spe  
-Timid Nature  
-- Make It Rain  
-- Shadow Ball  
-- Nasty Plot  
+Tera Type: Ghost  
+EVs: 244 HP / 180 Def / 4 SpA / 20 SpD / 60 Spe  
+Bold Nature  
+IVs: 20 Atk  
+- Electroweb  
+- Taunt  
+- Follow Me  
 - Protect
