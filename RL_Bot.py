@@ -215,6 +215,7 @@ async def main():
 
     # Train, evaluate, and save the model
     model = Sequential([
+        Input(shape=(31,)),
         Dense(128, activation="elu", input_shape=(agent.observation_space.shape,)),
         Flatten(),
         Dense(64, activation="elu"),
