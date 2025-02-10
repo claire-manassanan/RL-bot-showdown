@@ -12,7 +12,8 @@ from poke_env.player.battle_order import BattleOrder, ForfeitBattleOrder, Double
 from poke_env.player.env_player import EnvPlayer
 from poke_env.player.player import Player
 from poke_env.data import GenData
-
+from MaxDamgPlayer import MaxDamagePlayer
+from SmartBot import SmartBot
 type_chart = GenData(9).type_chart
 team1 = """
 Archaludon @ Assault Vest  
@@ -127,12 +128,15 @@ class Gen9VGCEnvDoublePlayer(EnvPlayer):
                     return Player.create_order(available_moves[move_id],
                          move_target=target_id - 1 )
                 
-            elif 12 <= pokemon_action < 24 and tera:  # Terastallized Move
+            elif 12 <= pokemon_action < 24:  # Terastallized Move
                 move_id = (pokemon_action - 12) // 3
                 target_id = (pokemon_action - 12) % 3
-                if move_id < len(available_moves):
+                if move_id < len(available_moves) and tera:
                     return Player.create_order(available_moves[move_id],
                          terastallize=True, move_target = target_id)
+                elif move_id < len(available_moves):
+                    return Player.create_order(available_moves[move_id],
+                         terastallize=False, move_target = target_id)
                 
             elif 24 <= pokemon_action < 28:  # Switch
                 switch_id = pokemon_action - 24
@@ -140,40 +144,40 @@ class Gen9VGCEnvDoublePlayer(EnvPlayer):
                     return Player.create_order(can_switch[switch_id])
             return None
         
-        print("="*50+
-              "\nBattle Detail",
-              "\nPokemon = ", battle.active_pokemon,
-              "\nAction = ", action, first_action, second_action,
-              "\nBattle Move = ", battle.available_moves,
-              "\nPokemon 1 Move = ", battle.available_moves[0],
-              "\nPokemon 2 Move = ", battle.available_moves[1],
-              "\nSwitch = ", battle.available_switches[0],
-              "\nTera = ", battle.can_tera,
-              "\n"+"="*50)
+#        print("="*50+
+#              "\nBattle Detail",
+#              "\nPokemon = ", battle.active_pokemon,
+#              "\nAction = ", action, first_action, second_action,
+#              "\nBattle Move = ", battle.available_moves,
+#              "\nPokemon 1 Move = ", battle.available_moves[0],
+#              "\nPokemon 2 Move = ", battle.available_moves[1],
+#              "\nSwitch = ", battle.available_switches[0],
+#              "\nTera = ", battle.can_tera,
+#              "\n"+"="*50)
         
-        print("Action 1 start...")
+#        print("Action 1 start...")
         action_1 = map_action(first_action, battle.available_moves[0], battle, battle.can_tera[0],
                               battle.available_switches[0])
-        print("Action 1 is ",action_1 ,"\nAction 2 start...")
-        action_2 = map_action(second_action, battle.available_moves[1], battle, battle.can_tera[1],
+#        print("Action 1 is ",action_1 ,"\nAction 2 start...")
+        action_2 = map_action(second_action, battle.available_moves[1], battle, battle.can_tera[-1],
                               battle.available_switches[1])
-        print("Action 2 is ",action_2)
+#        print("Action 2 is ",action_2)
 
-        if str(action_1) == str(action_2):
+        if str(action_1) == str(action_2) and ("switch" in str(action_1)):
             rand_move = Player.choose_random_move(battle)
-            print("Random Move...\n",rand_move)
+#            print("Random Move...\n",rand_move)
             return rand_move
         
-        print(str(DoubleBattleOrder(action_1, action_2)))
+#       print(str(DoubleBattleOrder(action_1, action_2)))
         if action_1 is None or action_2 is None:
             rand_move = Player.choose_random_move(battle)
-            print("Random Move...\n",rand_move)
+#            print("Random Move...\n",rand_move)
             return rand_move
         
-        print("="*50+
-              "\nFinal Action",
-              "\n= ",DoubleBattleOrder(action_1, action_2),
-              "\n"+"="*50)
+#        print("="*50+
+#              "\nFinal Action",
+#              "\n= ",DoubleBattleOrder(action_1, action_2),
+#              "\n"+"="*50)
         
         return DoubleBattleOrder(action_1, action_2)
     
@@ -254,7 +258,9 @@ class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
         fainted_ally = len([mon for mon in battle.team.values() if mon.fainted]) / 4
         fainted_enemy = len([mon for mon in battle.opponent_team.values() if mon.fainted]) / 4
 
-        # HP of all Pokémon (normalized)
+        tera = 1
+        if battle.can_tera[0] == False:
+            tera = 0
 
         # Final embedding vector
         final_vector = np.concatenate(
@@ -265,22 +271,21 @@ class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
                 multipliers_p1_e2,
                 multipliers_p2_e1,
                 multipliers_p2_e2,
-                [weather, fainted_ally, fainted_enemy],
+                [weather, fainted_ally, fainted_enemy, tera],
             ]
         )
         return final_vector.astype(np.float32)
 
     def describe_embedding(self) -> Space:
-        low = [-1] * 24 + [0, 0, 0]
-        high = [3] * 24 + [4, 1, 1]
+        low = [-1] * 24 + [0, 0, 0, 0]
+        high = [3] * 24 + [4, 1, 1, 1]
         return Box(
             np.array(low, dtype=np.float32),
             np.array(high, dtype=np.float32),
             dtype=np.float32,
         )
     
-NB_TRAINING_STEPS = 50_000
-TEST_EPISODES = 100
+NB_TRAINING_STEPS = 1_000_000
 GEN_9_DATA = GenData.from_gen(9)
 
 async def main():
@@ -297,7 +302,7 @@ async def main():
     model.learn(total_timesteps=NB_TRAINING_STEPS)
     print("Training complete.")
 
-    model.save("a2c_gen9vgc_model")
+    model.save("RL_gen9vgcRH_v10")
     print("Model saved to a2c_gen9vgc_model")
 
     obs, _ = env_player.reset()
@@ -309,38 +314,11 @@ async def main():
             obs, reward, done, _, info = env_player.step(action)
 
             if done:
-                print("Battle finished. Resetting...")
-                break  # ออกจาก loop ถ้า Battle จบแล้ว
+#                print("Battle finished. Resetting...")
+                break 
             
         except RuntimeError as e:
             print(f"Error detected: {e}")
             break  # ป้องกันการ crash ถ้า Battle จบโดยไม่คาดคิด
-    
-    print("Starting evaluation against RandomPlayer...")
-    
-    finished_episodes = 0
-    env_player.reset_battles()  
-    obs, _ = env_player.reset()
-    while finished_episodes < TEST_EPISODES:
-        try:
-            action, _ = model.predict(obs, deterministic=True)
-            obs, reward, done, _, info = env_player.step(action)
-
-            if done:
-                finished_episodes += 1
-                print(f"Battle {finished_episodes}/{TEST_EPISODES} finished.")
-
-                env_player.reset_battles()  # ✅ Reset หลังจบแต่ละรอบ
-                if finished_episodes < TEST_EPISODES:
-                    obs, _ = env_player.reset()
-                else:
-                    break  # จบเมื่อครบจำนวนการทดสอบ
-
-        except RuntimeError as e:
-            print(f"Error during evaluation: {e}")
-            break  # หยุดการทำงานหากเกิด Error
-
-    print(f"Evaluation against RandomPlayer: {env_player.n_won_battles} wins out of {TEST_EPISODES}")
-
 if __name__ == "__main__":
     asyncio.run(main())
