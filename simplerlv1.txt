@@ -1,0 +1,94 @@
+train with random
+-------------------------------------
+| time/                 |           |
+|    fps                | 198       |
+|    iterations         | 100000    |
+|    time_elapsed       | 2524      |
+|    total_timesteps    | 500000    |
+| train/                |           |
+|    entropy_loss       | -3.42e-06 |
+|    explained_variance | 0.000124  |
+|    learning_rate      | 0.0007    |
+|    n_updates          | 99999     |
+|    policy_loss        | -0        |
+|    value_loss         | 0.000107  |
+-------------------------------------
+✅ Evaluation against RandomPlayer: 91 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 41 wins out of 100
+✅ Evaluation against SmartBot: 2 wins out of 100
+
+train with maxdamage
+-------------------------------------
+| time/                 |           |
+|    fps                | 38        |
+|    iterations         | 100000    |
+|    time_elapsed       | 12892     |
+|    total_timesteps    | 500000    |
+| train/                |           |
+|    entropy_loss       | -1.73e-07 |
+|    explained_variance | 8.94e-07  |
+|    learning_rate      | 0.0007    |
+|    n_updates          | 99999     |
+|    policy_loss        | -0        |
+|    value_loss         | 0.00195   |
+-------------------------------------
+✅ Evaluation against RandomPlayer: 83 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 34 wins out of 100
+✅ Evaluation against SmartBot: 1 wins out of 100
+
+train with smart
+------------------------------------
+| time/                 |          |
+|    fps                | 109      |
+|    iterations         | 100000   |
+|    time_elapsed       | 4581     |
+|    total_timesteps    | 500000   |
+| train/                |          |
+|    entropy_loss       | -0.00347 |
+|    explained_variance | 8.94e-06 |
+|    learning_rate      | 0.0007   |
+|    n_updates          | 99999    |
+|    policy_loss        | 1.18e-05 |
+|    value_loss         | 0.00149  |
+------------------------------------
+✅ Evaluation against RandomPlayer: 83 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 34 wins out of 100
+✅ Evaluation against SmartBot: 0 wins out of 100
+
+train with smart and up time_step to 1_000_000
+------------------------------------
+| time/                 |          |
+|    fps                | 127      |
+|    iterations         | 200000   |
+|    time_elapsed       | 7833     |
+|    total_timesteps    | 1000000  |
+| train/                |          |
+|    entropy_loss       | -0.00148 |
+|    explained_variance | 3.4e-06  |
+|    learning_rate      | 0.0007   |
+|    n_updates          | 199999   |
+|    policy_loss        | 1.02e-06 |
+|    value_loss         | 6.04e-05 |
+------------------------------------
+✅ Evaluation against RandomPlayer: 73 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 33 wins out of 100
+✅ Evaluation against SmartBot: 1 wins out of 100
+
+train with smart and up time_step to 1_000_000 and adjust tera
+-------------------------------------
+| time/                 |           |
+|    fps                | 175       |
+|    iterations         | 200000    |
+|    time_elapsed       | 5683      |
+|    total_timesteps    | 1000000   |
+| train/                |           |
+|    entropy_loss       | -9.54e-05 |
+|    explained_variance | 0         |
+|    learning_rate      | 0.0007    |
+|    n_updates          | 199999    |
+|    policy_loss        | 5.35e-08  |
+|    value_loss         | 5.97e-05  |
+-------------------------------------
+✅ Evaluation against RandomPlayer: 73 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 20 wins out of 100
+ Evaluation against SmartBot: 0 wins out of 100

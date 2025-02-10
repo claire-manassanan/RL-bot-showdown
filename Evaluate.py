@@ -1,9 +1,10 @@
 import asyncio
-import nest_asyncio
 from stable_baselines3 import A2C
 from poke_env.player import RandomPlayer
 from A2C_RLbot import SimpleRLPlayer
 from stable_baselines3.common.vec_env import DummyVecEnv
+from MaxDamgPlayer import MaxDamagePlayer
+from SmartBot import SmartBot
 
 team1 = """
 Archaludon @ Assault Vest  
@@ -78,35 +79,47 @@ IVs: 20 Atk
 TEST_EPISODES = 100  # จำนวนเกมที่ต้องการทดสอบ
 
 async def evaluate():
-    # สร้าง Environment สำหรับ Evaluate
-    random_opponent = RandomPlayer(team=team1, battle_format="gen9vgc2024regh")
-    env_player = SimpleRLPlayer(battle_format="gen9vgc2024regh",
-                                team=team1, opponent=random_opponent, start_challenging=True)
+    opponent_list = [
+#        ("RandomPlayer", RandomPlayer(team=team1, battle_format="gen9vgc2024regh")),
+#        ("MaxDamagePlayer", MaxDamagePlayer(team=team1,battle_format="gen9vgc2024regh")),
+        ("SmartBot", SmartBot(team=team1,battle_format="gen9vgc2024regh"))
+        ]
     
-    env = DummyVecEnv([lambda: env_player])
-
-    # ✅ โหลดโมเดลที่เทรนไว้
-    model = A2C.load("a2c_gen9vgc_model", env=env)
+    # โหลดโมเดล
+    model = A2C.load("RL_gen9vgcRH_v5")
     print("Model loaded successfully!")
 
-    # ✅ เริ่มการประเมินผล
-    env_player.reset_battles()
-    obs, _ = env_player.reset()
-    finished_episodes = 0
+    for opponent_name, opponent in opponent_list:
+        print(f"\n🔹 Evaluating against {opponent_name} 🔹")
 
-    while True:
-        action, _ = model.predict(obs, deterministic=True)
-        try:
-            obs, reward, done, _, info = env_player.step(action)
-            print("Reward:", reward, "Done:", done, "Info:", info)
-            if done:
-                finished_episodes += 1
-                if finished_episodes >= TEST_EPISODES:
-                    break
-        except RuntimeError:
-            obs, _ = env_player.reset()
+        # สร้าง Environment ใหม่สำหรับแต่ละคู่ต่อสู้
+        env_player = SimpleRLPlayer(
+            battle_format="gen9vgc2024regh",
+            team=team1,
+            opponent=opponent,
+            start_challenging=True
+        )
+        
+        env_player.reset_battles()  # Reset ค่าจำนวนชัยชนะ
 
-    print("Evaluation against RandomPlayer: ", env_player.n_won_battles, "wins out of", TEST_EPISODES)
+        finished_episodes = 0
+        while finished_episodes < TEST_EPISODES:
+            obs, _ = env_player.reset()  # ✅ Reset ก่อนเริ่มรอบใหม่
+            done = False
+
+            while not done:  # ✅ เล่นจนกว่าจะจบเกม
+                try:
+                    action, _ = model.predict(obs, deterministic=True)
+                    obs, reward, done, _, info = env_player.step(action)
+                except RuntimeError:
+                    print("RuntimeError detected, resetting battle...")
+                    break  # ✅ ออกจากลูปนี้แล้วเริ่มเกมใหม่
+
+            finished_episodes += 1
+            print(f"Battle {finished_episodes}/{TEST_EPISODES} finished against {opponent_name}.")
+
+        # แสดงผลลัพธ์ของคู่ต่อสู้แต่ละคน
+        print(f"✅ Evaluation against {opponent_name}: {env_player.n_won_battles} wins out of {TEST_EPISODES}")
 
 if __name__ == "__main__":
     asyncio.run(evaluate())
