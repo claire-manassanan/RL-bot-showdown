@@ -14,6 +14,7 @@ from poke_env.player.player import Player
 from poke_env.data import GenData
 from MaxDamgPlayer import MaxDamagePlayer
 from SmartBot import SmartBot
+
 type_chart = GenData(9).type_chart
 team1 = """
 Archaludon @ Assault Vest  
@@ -88,6 +89,11 @@ class Gen9VGCEnvDoublePlayer(EnvPlayer):
     _ACTION_SPACE = list(range(784))  # 28 actions for each Pokémon → 28 * 28 = 784
     _DEFAULT_BATTLE_FORMAT = "gen9vgc2024regh"
 
+    
+    def choose_team_preview(self, battle: AbstractBattle) -> str:
+        # Call the teampreview method to get the team order
+        return self.teampreview(battle)
+    
     def action_to_move(self, action: int, battle: AbstractBattle) -> BattleOrder:
         """
         Converts actions to move orders for Double Battle with Terastallization.
@@ -153,6 +159,8 @@ class Gen9VGCEnvDoublePlayer(EnvPlayer):
 #              "\nPokemon 2 Move = ", battle.available_moves[1],
 #              "\nSwitch = ", battle.available_switches[0],
 #              "\nTera = ", battle.can_tera,
+#              "\nweather = ", battle.weather,
+#              "\nterrain = ", battle.weather,
 #              "\n"+"="*50)
         
 #        print("Action 1 start...")
@@ -178,7 +186,6 @@ class Gen9VGCEnvDoublePlayer(EnvPlayer):
 #              "\nFinal Action",
 #              "\n= ",DoubleBattleOrder(action_1, action_2),
 #              "\n"+"="*50)
-        
         return DoubleBattleOrder(action_1, action_2)
     
 class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
@@ -245,14 +252,20 @@ class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
                     multipliers_p2_e2[i] = -1
         # print("="*50,"\n",battle.weather,"\n"+"="*50)
         # Weather condition
+
+        weather_mapping = {
+            "RAIN": 1,
+            "SUN": 2,
+            "SAND": 3,
+            "HAIL": 4
+        }
+
         weather = 0
-        #if battle.weather:
-        #    weather = {
-        #        "SUNNYDAY": 1,
-        #        "RAINDANCE": 2,
-        #        "SANDSTORM": 3,
-        #        "SNOW": 4,
-        #    }.get(battle.weather, 0)
+        if battle.weather:
+            for condition, value in weather_mapping.items():
+                if condition in str(battle.weather):
+                    weather = value
+                    break
 
         # Fainted Pokémon
         fainted_ally = len([mon for mon in battle.team.values() if mon.fainted]) / 4
@@ -261,6 +274,12 @@ class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
         tera = 1
         if battle.can_tera[0] == False:
             tera = 0
+
+        hp_values = [-1] * 12  # Assuming 6 Pokémon per team
+        for i, mon in enumerate(battle.team.values()):
+            hp_values[i] = mon.current_hp_fraction
+        for i, mon in enumerate(battle.opponent_team.values(), start=6):
+            hp_values[i] = mon.current_hp_fraction
 
         # Final embedding vector
         final_vector = np.concatenate(
@@ -272,20 +291,25 @@ class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
                 multipliers_p2_e1,
                 multipliers_p2_e2,
                 [weather, fainted_ally, fainted_enemy, tera],
+                hp_values
             ]
         )
+#        print(50*"=","\n",
+#              final_vector.astype(np.float32),
+#                "\n"+"="*50
+#                )
         return final_vector.astype(np.float32)
 
     def describe_embedding(self) -> Space:
-        low = [-1] * 24 + [0, 0, 0, 0]
-        high = [3] * 24 + [4, 1, 1, 1]
+        low = [-1] * 24 + [0, 0, 0, 0] + [0] * 12 
+        high = [3] * 24 + [4, 1, 1, 1] + [1] * 12 
         return Box(
             np.array(low, dtype=np.float32),
             np.array(high, dtype=np.float32),
             dtype=np.float32,
         )
     
-NB_TRAINING_STEPS = 1_000_000
+NB_TRAINING_STEPS = 25
 GEN_9_DATA = GenData.from_gen(9)
 
 async def main():
@@ -302,7 +326,7 @@ async def main():
     model.learn(total_timesteps=NB_TRAINING_STEPS)
     print("Training complete.")
 
-    model.save("RL_gen9vgcRH_v10")
+#    model.save("RL_gen9vgcRH_v6")
     print("Model saved to a2c_gen9vgc_model")
 
     obs, _ = env_player.reset()
