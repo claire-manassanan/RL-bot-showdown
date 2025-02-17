@@ -92,3 +92,73 @@ train with smart and up time_step to 1_000_000 and adjust tera
 ✅ Evaluation against RandomPlayer: 73 wins out of 100
 ✅ Evaluation against MaxDamagePlayer: 20 wins out of 100
  Evaluation against SmartBot: 0 wins out of 100
+
+-------------------------------------
+| time/                 |           |
+|    fps                | 229       |
+|    iterations         | 200000    |
+|    time_elapsed       | 4353      |
+|    total_timesteps    | 1000000   |
+| train/                |           |
+|    entropy_loss       | -1.18e-22 |
+|    explained_variance | 0         |
+|    learning_rate      | 0.01      |
+|    n_updates          | 199999    |
+|    policy_loss        | -0        |
+|    value_loss         | 0.00207   |
+-------------------------------------
+
+------------------------------------
+| time/                 |          |
+|    fps                | 368      |
+|    iterations         | 50000    |
+|    time_elapsed       | 2715     |
+|    total_timesteps    | 1000000  |
+| train/                |          |
+|    entropy_loss       | -0.0918  |
+|    explained_variance | -0.427   |
+|    learning_rate      | 0.0007   |
+|    n_updates          | 49999    |
+|    policy_loss        | -0.132   |
+|    value_loss         | 243      |
+------------------------------------
+
+✅ Evaluation against RandomPlayer: 81 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 30 wins out of 100
+✅ Evaluation against SmartBot: 4 wins out of 100
+
+------------------------------------
+| time/                 |          |
+|    fps                | 336      |
+|    iterations         | 45400    |
+|    time_elapsed       | 2966     |
+|    total_timesteps    | 998800   |
+| train/                |          |
+|    entropy_loss       | -3.52    |
+|    explained_variance | 0        |
+|    learning_rate      | 0.0005   |
+|    n_updates          | 45399    |
+|    policy_loss        | -0.768   |
+|    value_loss         | 0.0531   |
+------------------------------------
+✅ Evaluation against RandomPlayer: 79 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 32 wins out of 100
+✅ Evaluation against SmartBot: 1 wins out of 100
+
+V22 Random opponent
+------------------------------------
+| time/                 |          |
+|    fps                | 140      |
+|    iterations         | 22700    |
+|    time_elapsed       | 3564     |
+|    total_timesteps    | 499400   |
+| train/                |          |
+|    entropy_loss       | -3.86    |
+|    explained_variance | 0        |
+|    learning_rate      | 0.0005   |
+|    n_updates          | 22699    |
+|    policy_loss        | -3.41    |
+|    value_loss         | 0.822    |
+------------------------------------
+✅ Evaluation against RandomPlayer: 94 wins out of 100
+✅ Evaluation against MaxDamagePlayer: 35 wins out of 100
