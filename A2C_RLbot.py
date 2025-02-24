@@ -1,3 +1,4 @@
+import os
 import asyncio
 import numpy as np
 from gymnasium.spaces import Box, Space
@@ -87,16 +88,14 @@ IVs: 20 Atk
 - Follow Me  
 - Protect 
 """
+
 class Gen9VGCEnvDoublePlayer(EnvPlayer):
     _ACTION_SPACE = list(range(784))  # 28 actions for each Pokémon → 28 * 28 = 784
     _DEFAULT_BATTLE_FORMAT = "gen9vgc2024regh"
 
-    
-    def choose_team_preview(self, battle: AbstractBattle) -> str:
-        # Return the team order as a string
-        # Example: "123456" means the order is Pokémon 1, 2, 3, 4, 5, 6
+    def team_preview(self, battle: AbstractBattle) -> str:
         return "123546"
-    
+
     def action_to_move(self, action: int, battle: AbstractBattle) -> BattleOrder:
         """
         Converts actions to move orders for Double Battle with Terastallization.
@@ -126,93 +125,92 @@ class Gen9VGCEnvDoublePlayer(EnvPlayer):
         first_action = action // 28
         second_action = action % 28
 
-        if battle.active_pokemon[0] == None or battle.active_pokemon[1] == None and len(battle.available_switches[0]) > 0:
+        if battle.active_pokemon[0] is None or battle.active_pokemon[1] is None and len(battle.available_switches[0]) > 0:
             return Player.choose_random_move(battle)
-        
+
         def map_action(pokemon_action, available_moves, battle, tera, can_switch, target):
             if len(available_moves) == 0:
                 return None
-            
+
             if len(available_moves) == 1:
                 return Player.create_order(available_moves[0], move_target=target[1])
-            
+
             if pokemon_action < 12:  # Normal Move
                 move_id = pokemon_action // 3
                 target_id = pokemon_action % 3
                 if move_id < len(available_moves):
                     return Player.create_order(available_moves[move_id],
-                         move_target=target[target_id])
+                                               move_target=target[target_id])
                 if len(available_moves) == 1:
                     return Player.create_order(available_moves[0], move_target=target[target_id])
-                
+
             elif 12 <= pokemon_action < 24:  # Terastallized Move
                 move_id = (pokemon_action - 12) // 3
                 target_id = (pokemon_action - 12) % 3
                 if move_id < len(available_moves) and tera:
                     return Player.create_order(available_moves[move_id],
-                         terastallize=True, move_target = target[target_id])
-                
+                                               terastallize=True, move_target=target[target_id])
+
                 elif move_id < len(available_moves):
                     return Player.create_order(available_moves[move_id],
-                         terastallize=False, move_target = target[target_id])
-                
+                                               terastallize=False, move_target=target[target_id])
+
                 elif len(available_moves) == 1 and tera:
                     return Player.create_order(available_moves[0],
-                            terastallize=True, move_target=target[target_id])
-                
+                                               terastallize=True, move_target=target[target_id])
+
                 elif len(available_moves) == 1:
                     return Player.create_order(available_moves[0],
-                            terastallize=False, move_target=target[target_id])
-                
+                                               terastallize=False, move_target=target[target_id])
+
             elif 24 <= pokemon_action < 28:  # Switch
                 switch_id = pokemon_action - 24
                 if switch_id < len(can_switch):
                     return Player.create_order(can_switch[switch_id])
             return None
-        
-#        print("="*50+
-#              "\nBattle Detail",
-#              "\nPokemon = ", battle.active_pokemon, len(battle.active_pokemon),
-#              "\nAction = ", action, first_action, second_action,
-#              "\nBattle Move = ", battle.available_moves,
-#              "\nPokemon 1 Move = ", battle.available_moves[0], len(battle.available_moves[0]),
-#              "\nPokemon 2 Move = ", battle.available_moves[1], len(battle.available_moves[1]),
-#              "\nSwitch = ", battle.available_switches[0],
-#              "\nTera = ", battle.can_tera,
-#              "\nweather = ", battle.weather,
-#              "\nterrain = ", battle.weather,
-#              "\n"+"="*50)
-        
-#        print("Action 1 start...")
+
         action_1 = map_action(first_action, battle.available_moves[0], battle, battle.can_tera[0],
                               battle.available_switches[0], target=[-2, 1, 2])
-#        print("Action 1 is ",action_1 ,"\nAction 2 start...")
         action_2 = map_action(second_action, battle.available_moves[1], battle, battle.can_tera[-1],
                               battle.available_switches[1], target=[-1, 1, 2])
-#        print("Action 2 is ",action_2)
 
         if str(action_1) == str(action_2) and ("switch" in str(action_1)):
             rand_move = Player.choose_random_move(battle)
-#            print("Random Move...\n",rand_move)
             return rand_move
-        
-#       print(str(DoubleBattleOrder(action_1, action_2)))
+
         if (action_1 is None or action_2 is None) and None not in battle.active_pokemon:
             rand_move = Player.choose_random_move(battle)
-#            print("Random Move...\n",rand_move)
             return rand_move
-        
-#        print("="*50+
-#              "\nFinal Action",
-#              "\n= ",DoubleBattleOrder(action_1, action_2),
-#              "\n"+"="*50)
+
         return DoubleBattleOrder(action_1, action_2)
-    
+
 class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.rewards = []
+
     def calc_reward(self, battle, last_state) -> float:
-        return self.reward_computing_helper(
-            battle, fainted_value=2.0, hp_value=1.0, victory_value=30.0
+        reward = self.reward_computing_helper(
+            battle, fainted_value=7.0, hp_value=0.5, victory_value=30.0
         )
+        damage_dealt = sum([mon.max_hp - mon.current_hp for mon in battle.opponent_team.values()])
+        damage_taken = sum([mon.max_hp - mon.current_hp for mon in battle.team.values()])
+        reward += (damage_dealt - damage_taken) * 0.1
+
+        status_effects = ["par", "brn", "slp", "frz", "psn", "tox"]
+        for mon in battle.opponent_team.values():
+            if mon.status in status_effects:
+                reward += 1.0
+
+        for mon in battle.team.values():
+            if mon.status in status_effects:
+                reward -= 1.0
+
+        active_pokemon_advantage = len([mon for mon in battle.team.values() if not mon.fainted]) - len([mon for mon in battle.opponent_team.values() if not mon.fainted])
+        reward += active_pokemon_advantage * 2.0
+
+        self.rewards.append(reward)
+        return reward
 
     def embed_battle(self, battle: AbstractBattle) -> ObsType:
         # Moves of Pokémon 1 and Pokémon 2
@@ -328,28 +326,7 @@ class SimpleRLPlayer(Gen9VGCEnvDoublePlayer):
             np.array(high, dtype=np.float32),
             dtype=np.float32,
         )
-    
-class OpponentSwitcher:
-    def __init__(self, random_opponent, max_damage_opponent, smart_bot_opponent):
-        self.random_opponent = random_opponent
-        self.max_damage_opponent = max_damage_opponent
-        self.smart_bot_opponent = smart_bot_opponent
-        self.opponents = [
-            (self.random_opponent, 0.5),
-            (self.max_damage_opponent, 0.3),
-            (self.smart_bot_opponent, 0.2)
-        ]
 
-    def get_opponent(self):
-        rand = random.random()
-        cumulative_probability = 0.0
-        for opponent, probability in self.opponents:
-            cumulative_probability += probability
-            if rand < cumulative_probability:
-                return opponent
-        return self.random_opponent
-        
-NB_TRAINING_STEPS = 500_000
 GEN_9_DATA = GenData.from_gen(9)
 
 async def main():
@@ -358,10 +335,8 @@ async def main():
     max_damage_opponent = MaxDamagePlayer(team=team1, battle_format="gen9vgc2024regh")
     smart_bot_opponent = SmartBot(team=team1, battle_format="gen9vgc2024regh")
 
-    opponent_switcher = OpponentSwitcher(random_opponent, max_damage_opponent, smart_bot_opponent)
-
     env_player = SimpleRLPlayer(battle_format="gen9vgc2024regh", team=team1, 
-                                opponent=opponent_switcher.get_opponent(), start_challenging=True)
+                                opponent=random_opponent, start_challenging=True)
 
     env = DummyVecEnv([lambda: env_player])
 
@@ -370,34 +345,49 @@ async def main():
     # Create the A2C model using the MLP policy (this is a simple neural network architecture)
     model = A2C("MlpPolicy", env,
                 device="cpu",
-                ent_coef=0.02,
-                learning_rate=0.0005,
-                n_steps=22,
-                gamma=0.8,
+                ent_coef=0.005,
+                learning_rate=0.001,
+                n_steps=50,
+                gamma=0.9,
                 policy_kwargs=policy_kwargs,
                 verbose=1)
     
-    # Training the model
-    model.learn(total_timesteps=NB_TRAINING_STEPS)
+    total_timesteps = 0
+    save_interval = 250000
+    save_dir = "model"
+    os.makedirs(save_dir, exist_ok=True)
+    # Train with random_opponent for .. steps
+    while total_timesteps < 200000:
+        model.learn(total_timesteps=save_interval, reset_num_timesteps=False)
+        total_timesteps += save_interval
+        model.save(f"RL_gen9vgcRH_v42_{total_timesteps}")
+        print(f"Model RL_gen9vgcRH_v42_{total_timesteps} saved at {total_timesteps} steps")
+
+    # Switch to max_damage_opponent and train for 400000 steps
+#    env_player.opponent = max_damage_opponent
+    while total_timesteps < 400000:
+        model.learn(total_timesteps=save_interval, reset_num_timesteps=False)
+        total_timesteps += save_interval
+        model.save(f"RL_gen9vgcRH_v42_{total_timesteps}")
+        print(f"Model RL_gen9vgcRH_v42_{total_timesteps} saved at {total_timesteps} steps")
+
+    # Switch to smart_bot_opponent and train for 1005000 steps
+#    env_player.opponent = smart_bot_opponent
+    while total_timesteps < 1005000:
+        model.learn(total_timesteps=save_interval, reset_num_timesteps=False)
+        total_timesteps += save_interval
+        model.save(f"RL_gen9vgcRH_v42_{total_timesteps}")
+        print(f"Model RL_gen9vgcRH_v42_{total_timesteps} saved at {total_timesteps} steps")
+
     print("Training complete.")
+    model.save("RL_gen9vgcRH_v42_final")
+    print("Final model saved to RL_gen9vgcRH_v42_final")
 
-    model.save("RL_gen9vgcRH_v22")
-    print("Model saved to RL_gen9vgcRH_v22")
+    # Save rewards to a notepad file
+    with open("rewards.txt", "w") as f:
+        for reward in env_player.rewards:
+            f.write(f"{reward}\n")
+    print("Rewards saved to rewards.txt")
 
-    obs, _ = env_player.reset()
-    done = False
-    
-    while not done:
-        try:
-            action, _ = model.predict(obs, deterministic=True)
-            obs, reward, done, _, info = env_player.step(action)
-
-            if done:
-                print("Battle finished. Resetting...")
-                break 
-            
-        except RuntimeError as e:
-            print(f"Error detected: {e}")
-            break  # ป้องกันการ crash ถ้า Battle จบโดยไม่คาดคิด
 if __name__ == "__main__":
     asyncio.run(main())
