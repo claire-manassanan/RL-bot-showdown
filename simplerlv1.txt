@@ -162,3 +162,54 @@ V22 Random opponent
 ------------------------------------
 ✅ Evaluation against RandomPlayer: 94 wins out of 100
 ✅ Evaluation against MaxDamagePlayer: 35 wins out of 100
+
+------------------------------------
+| time/                 |          |
+|    fps                | 424      |
+|    iterations         | 4500     |
+|    time_elapsed       | 233      |
+|    total_timesteps    | 999108   |
+| train/                |          |
+|    entropy_loss       | -6.48    |
+|    explained_variance | 1.19e-07 |
+|    learning_rate      | 0.001    |
+|    n_updates          | 45413    |
+|    policy_loss        | 2.19     |
+|    value_loss         | 0.115    |
+------------------------------------
+✅ Evaluation of RL_gen9vgcRH_v32_100000 against RandomPlayer: 91 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_100000 against MaxDamagePlayer: 44 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_100000 against SmartBot: 2 wins out of 100
+
+✅ Evaluation of RL_gen9vgcRH_v32_200000 against RandomPlayer: 92 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_200000 against MaxDamagePlayer: 43 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_200000 against SmartBot: 1 wins out of 100
+
+✅ Evaluation of RL_gen9vgcRH_v32_300000 against RandomPlayer: 85 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_300000 against MaxDamagePlayer: 42 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_300000 against SmartBot: 1 wins out of 100
+
+✅ Evaluation of RL_gen9vgcRH_v32_400000 against RandomPlayer: 92 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_400000 against MaxDamagePlayer: 41 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_400000 against SmartBot: 2 wins out of 100
+
+
+✅ Evaluation of RL_gen9vgcRH_v32_500000 against RandomPlayer: 84 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_500000 against MaxDamagePlayer: 33 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_500000 against SmartBot: 0 wins out of 100
+
+✅ Evaluation of RL_gen9vgcRH_v32_600000 against RandomPlayer: 87 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_600000 against MaxDamagePlayer: 48 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_600000 against SmartBot: 2 wins out of 100
+
+✅ Evaluation of RL_gen9vgcRH_v32_700000 against RandomPlayer: 91 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_700000 against MaxDamagePlayer: 43 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_700000 against SmartBot: 1 wins out of 100
+
+✅ Evaluation of RL_gen9vgcRH_v32_800000 against RandomPlayer: 85 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_800000 against MaxDamagePlayer: 39 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_800000 against SmartBot: 1 wins out of 100
+
+✅ Evaluation of RL_gen9vgcRH_v32_900000 against RandomPlayer: 89 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_900000 against MaxDamagePlayer: 44 wins out of 100
+✅ Evaluation of RL_gen9vgcRH_v32_900000 against SmartBot: 5 wins out of 100
