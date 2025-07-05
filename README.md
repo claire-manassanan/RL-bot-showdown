@@ -23,7 +23,7 @@ node pokemon-showdown start --no-security
 
 **⚠Warning:** the number of iterations in `A2C_full_network.py` script leave it with 1M iterations of training, it might crash you computer. And if it doesn't, it will take around 3-4 hours depend on your spec.  
 
-To start training:  
+To start training simply run:  
 
 ```bash
 python3 A2C_full_network.py
