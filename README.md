@@ -1,6 +1,6 @@
 # Reinforcement Learning for Pokémon Showndown using poke-env and StableBaselines3
 ### About the project
-This is a group university project in the subject "Research in Data Science" performed by me and [my classmate](https://github.com/Pynochio). We implemented the Double Battle using the [poke-env](https://github.com/hsahovic/poke-env) to build the agent and
+This is a group university project in the subject "Research in Data Science" operated by me and [my classmate](https://github.com/Pynochio). We implemented the Double Battle using the [poke-env](https://github.com/hsahovic/poke-env) to build the agent and
 applied the algorithm from [stable baselines 3](https://github.com/DLR-RM/stable-baselines3) to our agent.  
 ___
 ### What you need to install
