@@ -9,12 +9,12 @@ ___
 - stablebaselines3
 - poke-env  
 
-To start, just follow these steps. First, install the libraries: 
+Or just install those with pip:
 
 ```bash
 pip install -r requirements.txt
 ```
-
+### Training and Evaluation
 Start your own local server by typing this command:  
 
 ```bash
