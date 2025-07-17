@@ -6,10 +6,11 @@ ___
 ### What you need to install
 - python ver. 3.9 or above
 - node.js
+and the dependencies
 - stablebaselines3
 - poke-env  
 
-Or just install those with pip:
+Or just install those dependencies with pip:
 
 ```bash
 pip install -r requirements.txt
